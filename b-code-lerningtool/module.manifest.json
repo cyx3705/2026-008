@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "type": "HistoryVulcan.Module",
+  "name": "Cet4LearningTool",
+  "version": "0.2.0",
+  "description": "四级单词造文：选一个小单元交给 AI 生成短篇抄写",
+  "artifact": "Cet4LearningTool.dll",
+  "docs": "Cet4LearningTool.xml",
+  "mcpExposure": "readonly",
+  "ui": true,
+  "pinned": false
+}

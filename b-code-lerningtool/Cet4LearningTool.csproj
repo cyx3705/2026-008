@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Cet4LearningTool</AssemblyName>
+    <RootNamespace>Cet4LearningTool</RootNamespace>
+    <!-- 与 module.manifest.json 的 version 必须一致，否则宿主静默跳过本模块。 -->
+    <Version>0.2.0</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <HistoryVulcanHostRoot Condition="'$(HistoryVulcanHostRoot)' == ''">$(MSBuildThisFileDirectory)..\..\2026-023-HistoryVulcan\z-Publish\host</HistoryVulcanHostRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 宿主运行库由宿主提供，包里不带副本。 -->
+    <Reference Include="HistoryVulcan.Core">
+      <HintPath>$(HistoryVulcanHostRoot)\HistoryVulcan.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="module.manifest.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
