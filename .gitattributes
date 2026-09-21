@@ -1,52 +1,48 @@
-# 极保守 LFS 策略：不按扩展名批量套 LFS。
-# 旧的按扩展名通配（*.asm / *.baml 这类文本也在内）是 11GB LFS 占用
-# 与推送被 GitHub pre-receive 拒收的根因。
-# 下面只逐条列出**已经是 LFS 指针**的现存文件，保证这些指针不失效；
-# 新文件一律不自动进 LFS——只有单个文件超过 GitHub 100MB 硬限时，
-# 才由提交链路逐个征求人工同意后按精确路径追加。
+# LFS 规则：不到 100MB 的文件一律不走 LFS。
+# ≥100MB 的具体文件由下面的 HistoryJanus lfs 托管块逐条列出，其余行不得出现 filter=lfs。
 * text=auto
 
-a1-四级单词/U1.docx filter=lfs diff=lfs merge=lfs -text
-a1-四级单词/U10.docx filter=lfs diff=lfs merge=lfs -text
-a1-四级单词/U2.docx filter=lfs diff=lfs merge=lfs -text
-a1-四级单词/U3.docx filter=lfs diff=lfs merge=lfs -text
-a1-四级单词/U4.docx filter=lfs diff=lfs merge=lfs -text
-a1-四级单词/U5.docx filter=lfs diff=lfs merge=lfs -text
-a1-四级单词/U6.docx filter=lfs diff=lfs merge=lfs -text
-a1-四级单词/U7.docx filter=lfs diff=lfs merge=lfs -text
-a1-四级单词/U8.docx filter=lfs diff=lfs merge=lfs -text
-a1-四级单词/U9.docx filter=lfs diff=lfs merge=lfs -text
-a1-四级单词/模板.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写1.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写10.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写11.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写12.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写2.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写3.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写4.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写5.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写6-A5.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写7-A5.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写8.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写9.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译短篇抄写n.docx filter=lfs diff=lfs merge=lfs -text
-a2-四级翻译/四级翻译题目1.docx filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_06_1.mp3 filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_06_1.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_06_1_ans.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_06_2.mp3 filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_06_2.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_06_2_ans.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_06_3.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_06_3_ans.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_12_1.mp3 filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_12_1.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_12_1_ans.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_12_2.mp3 filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_12_2.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_12_2_ans.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_12_3.pdf filter=lfs diff=lfs merge=lfs -text
-a3-四级试卷/cet4_2025_12_3_ans.pdf filter=lfs diff=lfs merge=lfs -text
-b-Picture/Logo.png filter=lfs diff=lfs merge=lfs -text
-"b-References/2026年6月 晓艳英语四级急救班讲义.pdf" filter=lfs diff=lfs merge=lfs -text
-b-References/【英语四级你还在背单词吗】电子课本(1).pdf filter=lfs diff=lfs merge=lfs -text
+a1-四级单词/U1.docx -text
+a1-四级单词/U10.docx -text
+a1-四级单词/U2.docx -text
+a1-四级单词/U3.docx -text
+a1-四级单词/U4.docx -text
+a1-四级单词/U5.docx -text
+a1-四级单词/U6.docx -text
+a1-四级单词/U7.docx -text
+a1-四级单词/U8.docx -text
+a1-四级单词/U9.docx -text
+a1-四级单词/模板.docx -text
+a2-四级翻译/四级翻译短篇抄写1.docx -text
+a2-四级翻译/四级翻译短篇抄写10.docx -text
+a2-四级翻译/四级翻译短篇抄写11.docx -text
+a2-四级翻译/四级翻译短篇抄写12.docx -text
+a2-四级翻译/四级翻译短篇抄写2.docx -text
+a2-四级翻译/四级翻译短篇抄写3.docx -text
+a2-四级翻译/四级翻译短篇抄写4.docx -text
+a2-四级翻译/四级翻译短篇抄写5.docx -text
+a2-四级翻译/四级翻译短篇抄写6-A5.docx -text
+a2-四级翻译/四级翻译短篇抄写7-A5.docx -text
+a2-四级翻译/四级翻译短篇抄写8.docx -text
+a2-四级翻译/四级翻译短篇抄写9.docx -text
+a2-四级翻译/四级翻译短篇抄写n.docx -text
+a2-四级翻译/四级翻译题目1.docx -text
+a3-四级试卷/cet4_2025_06_1.mp3 -text
+a3-四级试卷/cet4_2025_06_1.pdf -text
+a3-四级试卷/cet4_2025_06_1_ans.pdf -text
+a3-四级试卷/cet4_2025_06_2.mp3 -text
+a3-四级试卷/cet4_2025_06_2.pdf -text
+a3-四级试卷/cet4_2025_06_2_ans.pdf -text
+a3-四级试卷/cet4_2025_06_3.pdf -text
+a3-四级试卷/cet4_2025_06_3_ans.pdf -text
+a3-四级试卷/cet4_2025_12_1.mp3 -text
+a3-四级试卷/cet4_2025_12_1.pdf -text
+a3-四级试卷/cet4_2025_12_1_ans.pdf -text
+a3-四级试卷/cet4_2025_12_2.mp3 -text
+a3-四级试卷/cet4_2025_12_2.pdf -text
+a3-四级试卷/cet4_2025_12_2_ans.pdf -text
+a3-四级试卷/cet4_2025_12_3.pdf -text
+a3-四级试卷/cet4_2025_12_3_ans.pdf -text
+b-Picture/Logo.png -text
+"b-References/2026年6月 晓艳英语四级急救班讲义.pdf" -text
+b-References/【英语四级你还在背单词吗】电子课本(1).pdf -text
