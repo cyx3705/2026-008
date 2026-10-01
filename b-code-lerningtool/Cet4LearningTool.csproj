@@ -7,7 +7,7 @@
     <AssemblyName>Cet4LearningTool</AssemblyName>
     <RootNamespace>Cet4LearningTool</RootNamespace>
     <!-- 与 module.manifest.json 的 version 必须一致，否则宿主静默跳过本模块。 -->
-    <Version>0.2.0</Version>
+    <Version>0.5.0</Version>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>

@@ -27,8 +27,16 @@ internal static class ArticleWriter
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };
 
-    public static List<Dictionary<string, string>> StartMessages(WordUnit unit)
-        => [Message("system", SystemPrompt), Message("user", BuildPrompt(unit))];
+    /// <param name="unit">小单元。一关按小单元逐个调用，每次只交一个小单元的单词，调用轻、查缺也准。</param>
+    /// <param name="usedTitles">这一关以前生成过的、以及本次前面小单元刚写的标题；要求换话题，免得雷同。</param>
+    public static List<Dictionary<string, string>> StartMessages(WordUnit unit, IReadOnlyList<string> usedTitles)
+        => [Message("system", SystemPrompt), Message("user", BuildPrompt(unit) + AvoidPrompt(usedTitles))];
+
+    private static string AvoidPrompt(IReadOnlyList<string> usedTitles)
+        => usedTitles.Count == 0
+            ? string.Empty
+            : $"已经写过这些短文：{string.Join("、", usedTitles.Select(t => "《" + t + "》"))}。"
+              + "这次必须换完全不同的话题、标题和句子，不要改写旧文。";
 
     public static Dictionary<string, string> Message(string role, string content)
         => new() { ["role"] = role, ["content"] = content };
@@ -126,11 +134,11 @@ internal static class ArticleWriter
     /// 沿用现有抄写文档的纯文本排法：# 标题、## 第N篇、「序号. 中文」下一行英文、句间留空行。
     /// 英文里的单元单词加粗；末尾列出本单元单词。
     /// </summary>
-    public static IReadOnlyList<IReadOnlyList<Segment>> Lines(WordUnit unit, IReadOnlyList<Article> articles)
+    public static IReadOnlyList<IReadOnlyList<Segment>> Lines(WordLevel level, IReadOnlyList<Article> articles)
     {
         var lines = new List<IReadOnlyList<Segment>>
         {
-            Plain($"# 四级翻译短篇抄写（{unit.Id} 单词造文，低配简易译法，逐句附译文，单元单词加粗，直接抄写）"),
+            Plain($"# 四级翻译短篇抄写（{level.Id} 单词造文，小单元 {level.Range}，低配简易译法，逐句附译文，单元单词加粗，直接抄写）"),
         };
         for (var a = 0; a < articles.Count; a++)
         {
@@ -139,14 +147,14 @@ internal static class ArticleWriter
             for (var i = 0; i < sentences.Count; i++)
             {
                 lines.Add(Plain($"{i + 1}. {sentences[i].Zh}"));
-                lines.Add(WordMatcher.Highlight(sentences[i].En, unit.Words));
+                lines.Add(WordMatcher.Highlight(sentences[i].En, level.Words));
                 lines.Add(Plain(string.Empty));
                 lines.Add(Plain(string.Empty));
             }
         }
 
-        lines.Add(Plain($"### {unit.Id} 单词（{unit.Words.Count} 个，已全部用上）"));
-        lines.Add(Plain(string.Join(", ", unit.Words)));
+        lines.Add(Plain($"### {level.Id} 单词（{level.Words.Count} 个，已全部用上）"));
+        lines.Add(Plain(string.Join(", ", level.Words)));
         return lines;
     }
 
@@ -265,22 +273,58 @@ internal static partial class WordMatcher
 /// <summary>抄写文档：以 a2 里的「四级翻译短篇抄写n.docx」为模板，只换正文段落。</summary>
 internal static partial class CopyDocument
 {
-    [GeneratedRegex(@"^四级翻译短篇抄写(\d+)(?:-(U\d+-\d+)(?=-|$))?")]
+    /// <summary>文件名尾巴是关（U1-L1，0.4.0 起）或小单元（U1-1，更早）。</summary>
+    [GeneratedRegex(@"^四级翻译短篇抄写(\d+)(?:-(U\d+-L?\d+)(?=-|$))?")]
     private static partial Regex CopyName();
 
-    /// <summary>下一个编号，文件名带小单元，如「四级翻译短篇抄写13-U1-1.docx」。</summary>
-    public static string NextPath(string directory, string unitId)
+    /// <summary>下一个编号，文件名带关，如「四级翻译短篇抄写25-U1-L1.docx」。</summary>
+    public static string NextPath(string directory, string levelId)
     {
         var next = Scan(directory).Select(item => item.number).DefaultIfEmpty(0).Max() + 1;
-        return Path.Combine(directory, $"四级翻译短篇抄写{next}-{unitId}.docx");
+        return Path.Combine(directory, $"四级翻译短篇抄写{next}-{levelId}.docx");
     }
 
-    /// <summary>每个小单元最近一次生成的文件名。</summary>
-    public static IReadOnlyDictionary<string, string> Existing(string directory)
+    /// <summary>按文件名尾巴（关或小单元编号）分组的全部文件名，按编号从旧到新。</summary>
+    public static IReadOnlyDictionary<string, IReadOnlyList<string>> Existing(string directory)
         => Scan(directory)
             .Where(item => item.unit is not null)
             .GroupBy(item => item.unit!)
-            .ToDictionary(group => group.Key, group => group.MaxBy(item => item.number).file);
+            .ToDictionary(
+                group => group.Key,
+                group => (IReadOnlyList<string>)group.OrderBy(item => item.number).Select(item => item.file).ToList());
+
+    /// <summary>
+    /// 只接受本目录下的抄写文件名，返回完整路径；界面传来的参数不能拿去打开任意文件。
+    /// </summary>
+    public static string? Resolve(string directory, string file)
+        => Scan(directory).Select(item => item.file)
+            .FirstOrDefault(name => string.Equals(name, file.Trim(), StringComparison.OrdinalIgnoreCase)) is { } found
+            ? Path.Combine(directory, found)
+            : null;
+
+    /// <summary>已生成文档里各篇的标题（「## 第N篇 标题」，0.1.0 的旧文件是「## 标题」）；读不了的文件跳过。</summary>
+    public static IReadOnlyList<string> Titles(string directory, IEnumerable<string> files)
+    {
+        var titles = new List<string>();
+        foreach (var file in files)
+        {
+            try
+            {
+                titles.AddRange(DocxText.Paragraphs(Path.Combine(directory, file))
+                    .Select(line => ArticleHeading().Match(line.Trim()))
+                    .Where(match => match.Success)
+                    .Select(match => match.Groups[1].Value.Trim()));
+            }
+            catch (Exception ex) when (ex is IOException or InvalidDataException or System.Xml.XmlException)
+            {
+            }
+        }
+
+        return titles.Distinct().ToList();
+    }
+
+    [GeneratedRegex(@"^##(?!#)\s*(?:第\S+?篇\s*)?(.+)$")]
+    private static partial Regex ArticleHeading();
 
     private static IEnumerable<(int number, string? unit, string file)> Scan(string directory)
         => Directory.EnumerateFiles(directory, "四级翻译短篇抄写*.docx")
