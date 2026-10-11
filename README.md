@@ -27,3 +27,7 @@
 - 作者：Pinavia - 2025
 
 ![logo](./b-Picture/Logo.png)
+
+## 宿主模块
+
+四级抄写模块版本 0.6.0，适用 HistoryVulcan 7.0.0。接入和数据边界见 [现行约定](b-Office/现行约定.md)，功能见 [模块说明](b-code-lerningtool/README.md)。发布使用宿主模块开发管线，不再使用旧目录包脚本。

@@ -1,0 +1,9 @@
+<Project>
+  <Import Project="Directory.Build.user.props" Condition="Exists('Directory.Build.user.props')" />
+  <PropertyGroup>
+    <HistoryVulcanHostRoot Condition="'$(HistoryVulcanHostRoot)' == '' and '$(HistoryVulcanPackageRoot)' != ''">$(HistoryVulcanPackageRoot)\host</HistoryVulcanHostRoot>
+  </PropertyGroup>
+  <Target Name="CheckHostContract" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(HistoryVulcanHostRoot)\HistoryVulcan.Core.dll')" Text="请通过开发管线构建，或显式传入 HistoryVulcanPackageRoot（含 host 的发布根）。" />
+  </Target>
+</Project>

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "template": { "isTemplate": false },
+  "project": { "id": "2026-008", "name": "Cet4LearningTool", "title": "英语四级学习", "kind": ["module", "study"], "status": "active", "version": "0.6.0" },
+  "paths": {
+    "activeRoots": ["b-code-lerningtool", "b-Code-Tests", "b-Office"],
+    "sourceRoots": ["b-code-lerningtool", "b-Code-Tests"],
+    "generatedRoots": ["z-Publish", "b-code-lerningtool/bin", "b-code-lerningtool/obj", "b-Code-Tests/bin", "b-Code-Tests/obj"],
+    "archiveRoots": [],
+    "allowedRootDirectoryPrefixes": ["a-", "b-", "z-"],
+    "allowedRootDirectoryNames": ["a1-四级单词", "a2-四级翻译", "a3-四级试卷"]
+  },
+  "documents": { "conventions": "b-Office/现行约定.md", "module": "b-code-lerningtool/README.md" },
+  "contract": { "linkCheckMode": "declared" },
+  "commands": {
+    "setup": "dotnet restore b-code-lerningtool/Cet4LearningTool.csproj",
+    "build": "dotnet build b-code-lerningtool/Cet4LearningTool.csproj -c Release",
+    "test": "dotnet run --project b-Code-Tests/Cet4LearningTool.Tests.csproj -c Release",
+    "verify": "dotnet run --project b-Code-Tests/Cet4LearningTool.Tests.csproj -c Release",
+    "run": null,
+    "package": "HistoryVulcan.Cli.exe --cli vulcan.dev.submit worktree=<当前工作区>"
+  },
+  "publish": {
+    "versionProps": "b-code-lerningtool/Cet4Version.props",
+    "versionProperty": "Cet4Version",
+    "sourceManifest": "b-code-lerningtool/module.manifest.json",
+    "package": { "project": "b-code-lerningtool/Cet4LearningTool.csproj", "files": ["Cet4LearningTool.dll", "Cet4LearningTool.xml", "module.manifest.json"], "publishTargetFramework": "net8.0" },
+    "validation": [
+      { "tool": "dotnet.exe", "arguments": ["run", "--project", "b-Code-Tests/Cet4LearningTool.Tests.csproj", "-c", "Release", "-p:NuGetAudit=false"], "description": "CET4 offline integration checks" }
+    ]
+  },
+  "contextExclusions": ["z-Publish/**", "**/bin/**", "**/obj/**", "b-References/**"]
+}

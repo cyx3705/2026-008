@@ -6,10 +6,10 @@ namespace Cet4LearningTool;
 /// <summary>模块身份。宿主按全名识别 ModuleInfoBase 子类，并比对 manifest 版本。</summary>
 public sealed class ModuleInfo : ModuleInfoBase
 {
-    /// <summary>显式给出，免得跟着程序集名漂移。注意页面 owner 另有规则，见 Cet4Page.Owner。</summary>
+    /// <summary>显式给出，免得跟着程序集名漂移。页面 owner 与此身份保持一致。</summary>
     public override string ModuleName => "Cet4LearningTool";
 
-    public override string Description => "四级单词造文：选一个小单元交给 AI 生成短篇抄写";
+    public override string Description => "四级单词造文：选一关逐个小单元交给 AI 生成短篇抄写";
 
     public override string Author => "OneHistory";
 

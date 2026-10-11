@@ -5,7 +5,7 @@ using HistoryVulcan.Core.Modules;
 
 namespace Cet4LearningTool;
 
-/// <summary>模块入口：登记页面协议三条指令与一条生成指令。</summary>
+/// <summary>模块入口：登记页面协议和抄写动作，保留 cet4 旧名兼容。</summary>
 public sealed class Cet4Module : IModuleContextAware
 {
     public void Attach(IModuleContext context)
@@ -14,18 +14,7 @@ public sealed class Cet4Module : IModuleContextAware
         context.RegisterCommands(registry => Register(registry, context.Bus));
     }
 
-    /// <summary>
-    /// 数据就在本仓里，模块却装在 AppData 运行区，所以这里只能写绝对路径。
-    /// </summary>
-    internal static class Paths
-    {
-        public const string Root = @"C:\OneHistory\HistoryClio\2026-008-英语四级学习";
-        public static readonly string Words = Path.Combine(Root, "a1-四级单词");
-        public static readonly string Output = Path.Combine(Root, "a2-四级翻译");
-        public static readonly string Template = Path.Combine(Output, "四级翻译短篇抄写n.docx");
-    }
-
-    private const string Domain = "cet4";
+    private const string Domain = "cet4learningtool";
     private const string Hidden = "界面内部协议，对模型无意义";
     /// <summary>首稿之后最多再让 AI 改几轮。</summary>
     private const int MaxFixRounds = 3;
@@ -33,62 +22,70 @@ public sealed class Cet4Module : IModuleContextAware
 
     private static void Register(ICommandRegistrar registry, ICommandBus bus)
     {
-        registry.Register(Internal("cet4.ui.describe", "返回四级抄写页的页面描述。",
-            _ => Json(Cet4Page.Describe())));
-
-        registry.Register(Internal("cet4.ui.actions", "返回四级抄写页的动作声明。",
-            _ => Json(Cet4Page.Actions())));
-
-        registry.Register(Internal("cet4.ui.data", "返回单词书按关的表格行。",
-            _ => Json(Cet4Page.Rows(WordBook.Levels(Paths.Words), CopyDocument.Existing(Paths.Output)))));
-
-        registry.Register(new CommandDescriptor
+        foreach (var prefix in new[] { Domain, "cet4" })
         {
-            Name = "cet4.copy.generate",
-            Domain = Domain,
-            CommandClass = "copy",
-            Summary = "把单词书的一关（如 U1-L1 = U1-1~U1-4）逐个小单元交给 AI 造文，合成 a2-四级翻译 里的一份短篇抄写。",
-            Example = "cet4.copy.generate level=U1-L1",
-            Level = CommandLevel.Run,
-            Parameters =
-            [
-                new ParameterSpec
-                {
-                    Name = "level",
-                    Description = "关编号：书号加关，如 U1-L1（也接受 1-L1、U1L1）。",
-                    Required = true,
-                    Position = 0,
-                },
-            ],
-            Handler = context => GenerateAsync(bus, context),
-        });
+            registry.Register(Internal(prefix + ".ui.describe", "返回四级抄写页的页面描述。",
+                _ => Task.FromResult(Json(Cet4Page.Describe()))));
 
-        registry.Register(new CommandDescriptor
-        {
-            Name = "cet4.copy.open",
-            Domain = Domain,
-            CommandClass = "copy",
-            Summary = "用系统默认程序打开 a2-四级翻译 里的一份短篇抄写。",
-            Example = "cet4.copy.open file=四级翻译短篇抄写13-U1-1.docx",
-            Level = CommandLevel.Run,
-            Parameters =
-            [
-                new ParameterSpec
+            registry.Register(Internal(prefix + ".ui.actions", "返回四级抄写页的动作声明。",
+                _ => Task.FromResult(Json(Cet4Page.Actions()))));
+
+            registry.Register(Internal(prefix + ".ui.data", "返回单词书按关的表格行。",
+                async context =>
                 {
-                    Name = "file",
-                    Description = "抄写文件名（只认 a2-四级翻译 里的「四级翻译短篇抄写*.docx」）。",
-                    Required = true,
-                    Position = 0,
-                },
-            ],
-            Handler = CommandDescriptor.Sync(Open),
-        });
+                    var paths = await LearningPaths.ResolveAsync(bus, context.Cancellation).ConfigureAwait(false);
+                    return Json(Cet4Page.Rows(WordBook.Levels(paths.Words), CopyDocument.Existing(paths.Output)));
+                }));
+
+            registry.Register(new CommandDescriptor
+            {
+                Name = prefix + ".copy.generate",
+                Domain = Domain,
+                CommandClass = "copy",
+                Summary = "把单词书的一关（如 U1-L1 = U1-1~U1-4）逐个小单元交给 AI 造文，合成 a2-四级翻译 里的一份短篇抄写。",
+                Example = prefix + ".copy.generate level=U1-L1",
+                Level = CommandLevel.Run,
+                Parameters =
+                [
+                    new ParameterSpec
+                    {
+                        Name = "level",
+                        Description = "关编号：书号加关，如 U1-L1（也接受 1-L1、U1L1）。",
+                        Required = true,
+                        Position = 0,
+                    },
+                ],
+                Handler = context => GenerateAsync(bus, context),
+            });
+
+            registry.Register(new CommandDescriptor
+            {
+                Name = prefix + ".copy.open",
+                Domain = Domain,
+                CommandClass = "copy",
+                Summary = "用系统默认程序打开 a2-四级翻译 里的一份短篇抄写。",
+                Example = prefix + ".copy.open file=四级翻译短篇抄写13-U1-1.docx",
+                Level = CommandLevel.Run,
+                Parameters =
+                [
+                    new ParameterSpec
+                    {
+                        Name = "file",
+                        Description = "抄写文件名（只认 a2-四级翻译 里的「四级翻译短篇抄写*.docx」）。",
+                        Required = true,
+                        Position = 0,
+                    },
+                ],
+                Handler = context => OpenAsync(bus, context),
+            });
+        }
     }
 
-    private static CommandResult Open(CommandContext context)
+    private static async Task<CommandResult> OpenAsync(ICommandBus bus, CommandContext context)
     {
         var file = context.RequireString("file");
-        var path = CopyDocument.Resolve(Paths.Output, file);
+        var paths = await LearningPaths.ResolveAsync(bus, context.Cancellation).ConfigureAwait(false);
+        var path = CopyDocument.Resolve(paths.Output, file);
         if (path is null)
             return CommandResult.Fail($"a2-四级翻译 里没有抄写文件 {file}");
 
@@ -103,17 +100,18 @@ public sealed class Cet4Module : IModuleContextAware
 
         try
         {
+            var paths = await LearningPaths.ResolveAsync(bus, context.Cancellation).ConfigureAwait(false);
             var id = context.RequireString("level");
-            var level = WordBook.Levels(Paths.Words).FirstOrDefault(l => l.Matches(id));
+            var level = WordBook.Levels(paths.Words).FirstOrDefault(l => l.Matches(id));
             if (level is null)
                 return CommandResult.Fail($"单词书里没有关 {id}");
 
             // 同一关可以反复生成，每次都是新编号的新文件；把旧标题交给 AI，让它换话题。
             // 0.4.0 以前按小单元生成的旧文件也算进去。
-            var existing = CopyDocument.Existing(Paths.Output);
+            var existing = CopyDocument.Existing(paths.Output);
             var previous = existing.TryGetValue(level.Id, out var files) ? files : [];
             var older = level.Units.SelectMany(u => existing.TryGetValue(u.Id, out var f) ? f : []);
-            var usedTitles = CopyDocument.Titles(Paths.Output, older.Concat(previous)).ToList();
+            var usedTitles = CopyDocument.Titles(paths.Output, older.Concat(previous)).ToList();
             context.Progress?.Report(
                 $"{level.Id}（{level.Range}）：{level.Units.Count} 个小单元 {level.Words.Count} 个单词，逐个小单元交给 AI 造文"
                 + (previous.Count == 0 ? string.Empty : $"，第 {previous.Count + 1} 次生成，避开已写过的 {usedTitles.Count} 个话题"));
@@ -129,10 +127,10 @@ public sealed class Cet4Module : IModuleContextAware
                 usedTitles.AddRange(written.Select(a => a.Title));
             }
 
-            var path = CopyDocument.NextPath(Paths.Output, level.Id);
+            var path = CopyDocument.NextPath(paths.Output, level.Id);
             try
             {
-                CopyDocument.Write(Paths.Template, path, ArticleWriter.Lines(level, articles));
+                CopyDocument.Write(paths.Template, path, ArticleWriter.Lines(level, articles));
             }
             catch (IOException ex)
             {
@@ -224,7 +222,7 @@ public sealed class Cet4Module : IModuleContextAware
 
     private static CommandResult Json(string json) => CommandResult.Ok(json, json);
 
-    private static CommandDescriptor Internal(string name, string summary, Func<CommandContext, CommandResult> handler)
+    private static CommandDescriptor Internal(string name, string summary, Func<CommandContext, Task<CommandResult>> handler)
         => new()
         {
             Name = name,
@@ -233,6 +231,6 @@ public sealed class Cet4Module : IModuleContextAware
             Summary = summary,
             Readonly = true,
             HiddenReason = Hidden,
-            Handler = CommandDescriptor.Sync(handler),
+            Handler = handler,
         };
 }

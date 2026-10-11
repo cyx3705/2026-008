@@ -1,0 +1,4 @@
+**/bin/**
+**/obj/**
+z-Publish/**
+Directory.Build.user.props
