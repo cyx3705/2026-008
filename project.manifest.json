@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "template": { "isTemplate": false },
-  "project": { "id": "2026-008", "name": "Cet4LearningTool", "title": "英语四级学习", "kind": ["module", "study"], "status": "active", "version": "0.6.0" },
+  "project": { "id": "2026-008", "name": "Cet4LearningTool", "title": "英语四级学习", "kind": ["module", "study"], "status": "active", "version": "0.6.1" },
   "paths": {
     "activeRoots": ["b-code-lerningtool", "b-Code-Tests", "b-Office"],
     "sourceRoots": ["b-code-lerningtool", "b-Code-Tests"],

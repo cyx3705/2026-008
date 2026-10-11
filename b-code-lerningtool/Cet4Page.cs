@@ -6,10 +6,10 @@ namespace Cet4LearningTool;
 /// <summary>Aurora 页面协议 V1：一页，上面一块面板，下面一张按关的表（一关一行）。</summary>
 internal static class Cet4Page
 {
-    /// <summary>页面归属和场景使用宿主登记的真实模块名。</summary>
-    private const string Owner = "Cet4LearningTool";
+    /// <summary>Aurora 1.33.1 仍按 cet4 前缀推导 HistoryCet4；实际行为与 page 自描述不一致。</summary>
+    private const string Owner = "HistoryCet4";
     public const string PageId = "copy";
-    private const string Channel = "cet4learningtool.level";
+    private const string Channel = "cet4.level";
 
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -48,8 +48,8 @@ internal static class Cet4Page
                                     widgets = new object[]
                                     {
                                         new { kind = "textbox", id = "level", label = "关", follows = Channel + ".level", flex = true },
-                                        new { kind = "button", text = "生成抄写", action = "cet4learningtool.copy.generate", enabledWhen = new { selected = Channel } },
-                                        new { kind = "button", text = "刷新", icon = "refresh-cw", action = "cet4learningtool.refresh" },
+                                        new { kind = "button", text = "生成抄写", action = "cet4.copy.generate", enabledWhen = new { selected = Channel } },
+                                        new { kind = "button", text = "刷新", icon = "refresh-cw", action = "cet4.refresh" },
                                     },
                                 },
                             },
@@ -59,7 +59,7 @@ internal static class Cet4Page
                             type = "table",
                             id = "units",
                             channel = Channel,
-                            dataSource = new { command = "cet4learningtool.ui.data" },
+                            dataSource = new { command = "cet4.ui.data" },
                             columns = new object[]
                             {
                                 new { key = "level", title = "关", width = "60" },
@@ -67,7 +67,7 @@ internal static class Cet4Page
                                 new { key = "count", title = "词数", width = "40" },
                                 new { key = "words", title = "单词", width = "*" },
                                 new { key = "times", title = "次数", width = "40" },
-                                new { key = "output", title = "已生成", width = "170", cellAction = "cet4learningtool.copy.open" },
+                                new { key = "output", title = "已生成", width = "170", cellAction = "cet4.copy.open" },
                             },
                         },
                     },
@@ -84,25 +84,25 @@ internal static class Cet4Page
         {
             new
             {
-                id = "cet4learningtool.copy.generate",
+                id = "cet4.copy.generate",
                 title = "生成抄写",
-                command = "cet4learningtool.copy.generate",
+                command = "cet4.copy.generate",
                 args = new { level = "{level}" },
                 summary = "把选中的一关逐个小单元交给 AI 造文，合成一份写进 a2-四级翻译。",
                 danger = false,
             },
             new
             {
-                id = "cet4learningtool.copy.open",
+                id = "cet4.copy.open",
                 title = "打开抄写",
-                command = "cet4learningtool.copy.open",
+                command = "cet4.copy.open",
                 args = new { file = "{output}" },
                 summary = "用 Word 打开这一关最近一次生成的抄写文档。",
                 danger = false,
             },
             new
             {
-                id = "cet4learningtool.refresh",
+                id = "cet4.refresh",
                 title = "刷新",
                 command = "aurora.ui.refreshdata",
                 args = new { page = PageId },

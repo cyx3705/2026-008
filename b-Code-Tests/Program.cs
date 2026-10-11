@@ -44,10 +44,10 @@ static class Checks
         var host = new FakeHost(bus);
         new Cet4Module().Attach(host);
         Require(bus.Calls == 0, "Attach must only register, not call other modules");
-        Require(host.Commands.Count == 10, "Canonical commands and all five legacy aliases required");
+        Require(host.Commands.Count == 8, "Canonical business/data commands and all five legacy commands required");
         foreach (var suffix in new[] { "ui.describe", "ui.actions", "ui.data" })
         {
-            var canonical = host.Commands["cet4learningtool." + suffix];
+            var canonical = host.Commands[(suffix == "ui.data" ? "cet4learningtool." : "cet4.") + suffix];
             var legacy = host.Commands["cet4." + suffix];
             Require(canonical.Readonly && legacy.Readonly && canonical.HiddenReason != null && legacy.HiddenReason != null, "UI commands hidden and readonly");
             var result = await canonical.Handler(Context(canonical));
@@ -62,11 +62,12 @@ static class Checks
             }
             else
             {
-                Require(json.RootElement.GetProperty("owner").GetString() == "Cet4LearningTool", "Owner is actual module identity");
+                Require(json.RootElement.GetProperty("owner").GetString() == "HistoryCet4", "Owner matches current Aurora prefix inference");
                 if (suffix == "ui.describe")
-                    Require(json.RootElement.GetProperty("pages")[0].GetProperty("scene").GetString() == "Cet4LearningTool", "Scene matches owner");
+                    Require(json.RootElement.GetProperty("pages")[0].GetProperty("scene").GetString() == "HistoryCet4", "Scene matches owner");
             }
         }
+        Require(!host.Commands.ContainsKey("cet4learningtool.ui.describe"), "Do not duplicate the copy page under a second inferred owner");
         foreach (var name in new[] { "cet4.copy.generate", "cet4.copy.open", "cet4learningtool.copy.generate", "cet4learningtool.copy.open" })
             Require(!host.Commands[name].Readonly, "Business actions must remain writes");
         Require(Directory.GetFiles(output).Length == 0, "Readonly data must not write learning documents");

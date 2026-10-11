@@ -1,6 +1,6 @@
 # 四级学习模块工作合同
 
-模块 Cet4LearningTool 0.6.0，适用 HistoryVulcan 7.0.0；公开代码契约为 Core 6.0.0。
+模块 Cet4LearningTool 0.6.1，适用 HistoryVulcan 7.0.0；公开代码契约为 Core 6.0.0。
 先读 project.manifest.json、README.md 和 b-Office/现行约定.md。
 模块修改走宿主模块开发手册的 start / submit / finish，在 start 返回的 F 盘工作区实施。
 只引用已发布 HistoryVulcan.Core，不引用宿主内部实现，不停止宿主，不手动安装运行包。

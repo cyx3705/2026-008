@@ -24,11 +24,15 @@ public sealed class Cet4Module : IModuleContextAware
     {
         foreach (var prefix in new[] { Domain, "cet4" })
         {
-            registry.Register(Internal(prefix + ".ui.describe", "返回四级抄写页的页面描述。",
-                _ => Task.FromResult(Json(Cet4Page.Describe()))));
+            // Aurora 1.33.1 按指令前缀推导 owner；只公布旧页面入口，避免同页被询问两次。
+            if (prefix == "cet4")
+            {
+                registry.Register(Internal(prefix + ".ui.describe", "返回四级抄写页的页面描述。",
+                    _ => Task.FromResult(Json(Cet4Page.Describe()))));
 
-            registry.Register(Internal(prefix + ".ui.actions", "返回四级抄写页的动作声明。",
-                _ => Task.FromResult(Json(Cet4Page.Actions()))));
+                registry.Register(Internal(prefix + ".ui.actions", "返回四级抄写页的动作声明。",
+                    _ => Task.FromResult(Json(Cet4Page.Actions()))));
+            }
 
             registry.Register(Internal(prefix + ".ui.data", "返回单词书按关的表格行。",
                 async context =>

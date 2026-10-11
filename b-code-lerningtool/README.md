@@ -16,7 +16,7 @@
 
 部署使用宿主模块开发手册的 start → submit → 人工审批 → finish。
 7.0.0 的运行包为 Cet4LearningTool.nupkg；旧 Deploy.ps1 不再构建或安装目录包。
-规范指令域为 cet4learningtool，原 cet4.* 五条命令仍兼容；页面归属为 Cet4LearningTool。
+规范指令域为 cet4learningtool，原 cet4.* 五条命令仍兼容；页面归属暂兼容 Aurora 1.33.1 的 HistoryCet4 推导，运行差异见现行约定。
 学习资料按宿主 vulcan.host.info 的 libraryRoot 定位主树，不再写死磁盘路径。
 构建前通过管线或显式 -p:HistoryVulcanPackageRoot 配置宿主发布根（包含 host）。
 版本源 Cet4Version.props；改版同步根 project.manifest.json 和 module.manifest.json。
