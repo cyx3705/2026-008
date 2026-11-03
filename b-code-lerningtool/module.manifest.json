@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "type": "HistoryVulcan.Module",
   "name": "Cet4LearningTool",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "四级单词造文：选一关，逐个小单元交给 AI 造文，合成一份短篇抄写",
-  "dependsOn": ["HistoryAurora", "HistoryApollo"],
+  "dependsOn": ["HistoryAurora", "Ratio"],
   "ui": true,
   "pinned": false
 }

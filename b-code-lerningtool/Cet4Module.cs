@@ -209,19 +209,19 @@ public sealed class Cet4Module : IModuleContextAware
         }
     }
 
-    /// <summary>Apollo 的结构化载荷是 JSON 文本，答复正文在 content。</summary>
+    /// <summary>Ratio 的结构化载荷是 JSON 文本，答复正文在 content。</summary>
     private static string ReadContent(CommandResult reply)
     {
         var data = reply.Data switch
         {
             string text => text,
-            null => throw new FormatException("Apollo 没有返回结构化载荷"),
+            null => throw new FormatException("Ratio 没有返回结构化载荷"),
             var other => JsonSerializer.Serialize(other),
         };
         using var document = JsonDocument.Parse(data);
         return document.RootElement.TryGetProperty("content", out var content)
             ? content.GetString() ?? string.Empty
-            : throw new FormatException("Apollo 载荷里没有 content");
+            : throw new FormatException("Ratio 载荷里没有 content");
     }
 
     private static CommandResult Json(string json) => CommandResult.Ok(json, json);

@@ -16,7 +16,7 @@ internal sealed record Article(string Title, IReadOnlyList<Sentence> Sentences);
 /// <summary>文档里的一段文字；Bold 为真时加粗。</summary>
 internal sealed record Segment(string Text, bool Bold = false);
 
-/// <summary>造文：拼 apollo.chat.send 指令、解析答复、排成抄写文档的行。</summary>
+/// <summary>造文：拼 ratio.chat.send 指令、解析答复、排成抄写文档的行。</summary>
 internal static class ArticleWriter
 {
     private const string SystemPrompt =
@@ -42,11 +42,11 @@ internal static class ArticleWriter
         => new() { ["role"] = role, ["content"] = content };
 
     /// <summary>
-    /// 发给总线的一行。上下文由本模块持有（Apollo 不存历史），修改轮把上一稿和缺词说明追加进来再发。
+    /// 发给总线的一行。上下文由本模块持有（Ratio 不存历史），修改轮把上一稿和缺词说明追加进来再发。
     /// messages 经 JSON 序列化后没有裸换行，再经 QuoteArg 编码。
     /// </summary>
     public static string SendCommand(IReadOnlyList<Dictionary<string, string>> messages)
-        => "apollo.chat.send json=true maxtokens=4000 timeout=240 messages="
+        => "ratio.chat.send json=true maxtokens=4000 timeout=240 messages="
            + CommandParser.QuoteArg(JsonSerializer.Serialize(messages, Options));
 
     private static string BuildPrompt(WordUnit unit)
