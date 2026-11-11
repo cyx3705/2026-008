@@ -46,7 +46,7 @@ public sealed class Cet4Module : IModuleContextAware
                 Name = prefix + ".copy.generate",
                 Domain = Domain,
                 CommandClass = "copy",
-                Summary = "把单词书的一关（如 U1-L1 = U1-1~U1-4）逐个小单元交给 AI 造文，合成 a2-四级翻译 里的一份短篇抄写。",
+                Summary = "按词书关卡生成英语短篇抄写材料",
                 Example = prefix + ".copy.generate level=U1-L1",
                 Level = CommandLevel.Run,
                 Parameters =
